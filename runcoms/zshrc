@@ -11,3 +11,48 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
 fi
 
 # Customize to your needs...
+reset-ckb() {
+	sudo launchctl unload /Library/LaunchDaemons/com.ckb.daemon.plist
+	sudo launchctl load /Library/LaunchDaemons/com.ckb.daemon.plist
+}
+
+
+cpr() {
+
+  to_branch=$1
+
+  if [ -z $to_branch ]; then
+
+    to_branch="master"
+
+  fi
+
+
+  # try the upstream branch if possible, otherwise origin will do
+
+  upstream=$(git config --get remote.upstream.url)
+
+  origin=$(git config --get remote.origin.url)
+
+  if [ -z $upstream ]; then
+
+    upstream=$origin
+
+  fi
+
+
+  to_user=$(echo $upstream | sed -e 's/.*[\/:]\([^/]*\)\/[^/]*$/\1/')
+
+  from_user=$(echo $origin | sed -e 's/.*[\/:]\([^/]*\)\/[^/]*$/\1/')
+
+  repo=$(basename `git rev-parse --show-toplevel`)
+
+  from_branch=$(git rev-parse --abbrev-ref HEAD)
+
+  default_body="?expand=1&body=@CodeReviewersYouWant%0A%0AJIRA%0A===%0Ahttps://jira.zocdoc.local/jira/browse/TICKET-ID%0A%0ADescription%0A===%0ASome%20description"
+
+  full_url="https://github.com/$to_user/$repo/compare/$to_user:$to_branch...$from_user:$from_branch$default_body"
+
+  open $full_url
+
+}
